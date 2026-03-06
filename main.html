@@ -253,3 +253,88 @@
     }
 
     .connect-prompt {
+      text-align: center;
+      padding: 3rem 2rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .connect-prompt p {
+      color: var(--text-dim);
+      margin-bottom: 1.5rem;
+    }
+
+    .contract-config {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 1rem;
+    }
+
+    .contract-config input {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      margin-top: 0.3rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+    }
+
+    .health-bar {
+      height: 8px;
+      background: var(--surface);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .health-bar .fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s, background 0.3s;
+    }
+
+    .health-bar .fill.safe { background: var(--accent); }
+    .health-bar .fill.warn { background: var(--warn); }
+    .health-bar .fill.danger { background: var(--danger); }
+
+    .tx-status {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      display: none;
+    }
+
+    .tx-status.show { display: block; }
+    .tx-status.success { background: rgba(0, 212, 170, 0.15); border: 1px solid var(--accent); color: var(--accent); }
+    .tx-status.error { background: rgba(255, 107, 107, 0.15); border: 1px solid var(--danger); color: var(--danger); }
+    .tx-status.pending { background: rgba(240, 193, 75, 0.15); border: 1px solid var(--warn); color: var(--warn); }
+
+    footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">Katana<span>Lend</span></div>
+      <div class="wallet" id="walletInfo">
+        <span class="addr" id="userAddr">—</span>
+        <button class="btn" id="connectBtn">Connect</button>
+      </div>
+    </header>
+
+    <div id="connectPrompt" class="connect-prompt">
+      <p>Connect your wallet to use the BladeForge Vault lending market.</p>
+      <button class="btn primary" id="connectBtnMain">Connect Wallet</button>
+      <div class="contract-config" style="margin-top: 1.5rem;">
