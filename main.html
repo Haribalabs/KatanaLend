@@ -168,3 +168,88 @@
       font-size: 0.9rem;
       font-weight: 500;
       color: var(--text-dim);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.95rem;
+      font-family: var(--font-mono);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+    }
+
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .input-row input { flex: 1; }
+    .input-row .max {
+      font-size: 0.8rem;
+      color: var(--accent);
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+    .input-row .max:hover { text-decoration: underline; }
+
+    .panel-section {
+      display: none;
+    }
+    .panel-section.active { display: block; }
+
+    .position-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+
+    .position-row:last-child { border-bottom: none; }
+
+    .position-row .asset {
+      font-family: var(--font-mono);
+      color: var(--accent);
+    }
+
+    .position-row .amount { font-family: var(--font-mono); color: var(--text); }
+
+    .empty {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    .connect-prompt {
