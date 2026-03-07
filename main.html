@@ -593,3 +593,88 @@
             opt3.textContent = fmtShort(a);
             collateralSelect.appendChild(opt3);
           });
+
+          const positions = await vault.getPositionSummary(userAddress);
+          const listEl = document.getElementById("positionList");
+          listEl.innerHTML = "";
+          let hasAny = false;
+          for (const p of positions) {
+            if (p.supplied === 0n && p.borrowBalanceCurrent === 0n) continue;
+            hasAny = true;
+            const row = document.createElement("div");
+            row.className = "position-row";
+            row.innerHTML = "<span class=\"asset\">" + fmtShort(p.asset) + "</span>" +
+              "<span class=\"amount\">Supplied: " + fmtWad(p.supplied) + " · Borrowed: " + fmtWad(p.borrowBalanceCurrent) + (p.collateralEnabled ? " · Collateral on" : "") + "</span>";
+            listEl.appendChild(row);
+          }
+          if (!hasAny) listEl.innerHTML = "<div class=\"empty\">No positions yet. Supply or borrow to get started.</div>";
+        } catch (e) {
+          console.error(e);
+          if (!vaultAddress) showTx("Set a valid BladeForge Vault contract address and reconnect.", "error");
+        }
+      }
+
+      async function getMaxSupply() {
+        if (!vault || !userAddress) return;
+        const asset = document.getElementById("supplyAsset").value;
+        if (!asset) return;
+        const bal = await vault.getSupplyBalance(userAddress, asset);
+        document.getElementById("supplyAmount").value = bal === 0n ? "0" : (Number(bal) / 1e18).toString();
+      }
+
+      async function getMaxWithdraw() {
+        if (!vault || !userAddress) return;
+        const asset = document.getElementById("supplyAsset").value;
+        const bal = await vault.getSupplyBalance(userAddress, asset);
+        document.getElementById("withdrawAmount").value = bal === 0n ? "0" : (Number(bal) / 1e18).toString();
+      }
+
+      async function getMaxBorrow() {
+        if (!vault || !userAddress) return;
+        const asset = document.getElementById("borrowAsset").value;
+        const cap = await vault.getMaxBorrowCapacityWad(userAddress, asset);
+        document.getElementById("borrowAmount").value = cap === 0n ? "0" : (Number(cap) / 1e18).toString();
+      }
+
+      async function getMaxRepay() {
+        if (!vault || !userAddress) return;
+        const asset = document.getElementById("borrowAsset").value;
+        const bal = await vault.getBorrowBalance(userAddress, asset);
+        document.getElementById("repayAmount").value = bal === 0n ? "0" : (Number(bal) / 1e18).toString();
+      }
+
+      document.getElementById("supplyMax").onclick = getMaxSupply;
+      document.getElementById("withdrawMax").onclick = getMaxWithdraw;
+      document.getElementById("borrowMax").onclick = getMaxBorrow;
+      document.getElementById("repayMax").onclick = getMaxRepay;
+
+      async function doSupply() {
+        if (!vault || !userAddress) return;
+        const asset = document.getElementById("supplyAsset").value;
+        const amount = document.getElementById("supplyAmount").value;
+        if (!amount || Number(amount) <= 0) {
+          showTx("Enter a valid amount.", "error");
+          return;
+        }
+        const amountWei = ethers.parseUnits(amount, 18);
+        showTx("Confirm supply in your wallet…", "pending");
+        try {
+          const tx = await vault.supply(asset, amountWei);
+          showTx("Tx sent: " + tx.hash + ". Waiting…", "pending");
+          await tx.wait();
+          showTx("Supply successful.", "success");
+          document.getElementById("supplyAmount").value = "";
+          refresh();
+        } catch (e) {
+          showTx(e.message || "Supply failed", "error");
+        }
+      }
+
+      async function doWithdraw() {
+        if (!vault || !userAddress) return;
+        const asset = document.getElementById("supplyAsset").value;
+        const amount = document.getElementById("withdrawAmount").value;
+        if (!amount || Number(amount) <= 0) {
+          showTx("Enter a valid amount.", "error");
+          return;
+        }
