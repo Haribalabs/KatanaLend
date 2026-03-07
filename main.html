@@ -338,3 +338,88 @@
       <p>Connect your wallet to use the BladeForge Vault lending market.</p>
       <button class="btn primary" id="connectBtnMain">Connect Wallet</button>
       <div class="contract-config" style="margin-top: 1.5rem;">
+        <label>Vault contract address (optional)</label>
+        <input type="text" id="vaultAddress" placeholder="0x..." />
+      </div>
+    </div>
+
+    <div id="appContent" style="display: none;">
+      <div class="stats">
+        <div class="stat">
+          <div class="label">TVL (est)</div>
+          <div class="value accent" id="statTvl">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Your collateral</div>
+          <div class="value" id="statCollateral">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Your debt</div>
+          <div class="value" id="statDebt">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Health factor</div>
+          <div class="value" id="statHealth">—</div>
+          <div class="health-bar" id="healthBar"><div class="fill safe" id="healthFill" style="width: 100%"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Positions</h2>
+        <div class="tabs">
+          <button class="tab active" data-tab="supply">Supply / Withdraw</button>
+          <button class="tab" data-tab="borrow">Borrow / Repay</button>
+          <button class="tab" data-tab="overview">Overview</button>
+        </div>
+
+        <div id="panelSupply" class="panel-section active">
+          <div class="form-group">
+            <label>Asset</label>
+            <select id="supplyAsset"></select>
+          </div>
+          <div class="form-group">
+            <label>Amount (supply)</label>
+            <div class="input-row">
+              <input type="text" id="supplyAmount" placeholder="0" />
+              <span class="max" id="supplyMax">Max</span>
+            </div>
+          </div>
+          <button class="btn primary" id="supplyBtn">Supply</button>
+          <hr style="border: none; border-top: 1px solid var(--border); margin: 1rem 0;" />
+          <div class="form-group">
+            <label>Amount (withdraw)</label>
+            <div class="input-row">
+              <input type="text" id="withdrawAmount" placeholder="0" />
+              <span class="max" id="withdrawMax">Max</span>
+            </div>
+          </div>
+          <button class="btn" id="withdrawBtn">Withdraw</button>
+        </div>
+
+        <div id="panelBorrow" class="panel-section">
+          <div class="form-group">
+            <label>Asset</label>
+            <select id="borrowAsset"></select>
+          </div>
+          <div class="form-group">
+            <label>Amount (borrow)</label>
+            <div class="input-row">
+              <input type="text" id="borrowAmount" placeholder="0" />
+              <span class="max" id="borrowMax">Max</span>
+            </div>
+          </div>
+          <button class="btn primary" id="borrowBtn">Borrow</button>
+          <hr style="border: none; border-top: 1px solid var(--border); margin: 1rem 0;" />
+          <div class="form-group">
+            <label>Amount (repay)</label>
+            <div class="input-row">
+              <input type="text" id="repayAmount" placeholder="0" />
+              <span class="max" id="repayMax">Max</span>
+            </div>
+          </div>
+          <button class="btn" id="repayBtn">Repay</button>
+        </div>
+
+        <div id="panelOverview" class="panel-section">
+          <div id="positionList"></div>
+          <div class="card" style="margin-top: 1rem;">
