@@ -508,3 +508,88 @@
           }
           await refresh();
         } catch (e) {
+          showTx(e.message || "Connection failed", "error");
+        }
+      }
+
+      function disconnect() {
+        provider = signer = vault = vaultAddress = userAddress = null;
+        userAddr.textContent = "—";
+        connectBtn.textContent = "Connect";
+        connectPrompt.style.display = "block";
+        appContent.style.display = "none";
+      }
+
+      connectBtn.onclick = () => {
+        if (userAddress) disconnect();
+        else connect();
+      };
+      connectBtnMain.onclick = connect;
+
+      document.querySelectorAll(".tab").forEach(t => {
+        t.onclick = () => {
+          document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+          document.querySelectorAll(".panel-section").forEach(x => x.classList.remove("active"));
+          t.classList.add("active");
+          document.getElementById("panel" + t.dataset.tab.charAt(0).toUpperCase() + t.dataset.tab.slice(1)).classList.add("active");
+        };
+      });
+
+      function fmtWad(wad) {
+        if (!wad || wad === 0n) return "0";
+        const s = wad.toString();
+        if (s.length <= 18) return "0." + s.padStart(18, "0").slice(0, 6);
+        return (Number(wad) / 1e18).toLocaleString(undefined, { maximumFractionDigits: 6 });
+      }
+
+      function fmtShort(addr) {
+        if (!addr) return "—";
+        return addr.slice(0, 6) + "…" + addr.slice(-4);
+      }
+
+      async function refresh() {
+        if (!vault || !userAddress) return;
+        try {
+          const [assets, overview, stats] = await Promise.all([
+            vault.getAssetList(),
+            vault.getUserOverview(userAddress),
+            vault.getMarketStats()
+          ]);
+
+          const tvlWad = stats[1];
+          document.getElementById("statTvl").textContent = fmtWad(tvlWad) + " (Wad)";
+          document.getElementById("statCollateral").textContent = fmtWad(overview.totalCollateralValueWad);
+          document.getElementById("statDebt").textContent = fmtWad(overview.totalDebtValueWad);
+          let healthStr = "∞";
+          if (overview.healthFactorWad !== ethers.MaxUint256 && overview.healthFactorWad !== undefined) {
+            healthStr = fmtWad(overview.healthFactorWad);
+            const fill = document.getElementById("healthFill");
+            const pct = Number(overview.healthFactorWad) / 1e18;
+            fill.style.width = Math.min(100, pct * 50) + "%";
+            fill.classList.remove("safe", "warn", "danger");
+            if (pct >= 1.5) fill.classList.add("safe");
+            else if (pct >= 1) fill.classList.add("warn");
+            else fill.classList.add("danger");
+          }
+          document.getElementById("statHealth").textContent = healthStr;
+
+          const supplySelect = document.getElementById("supplyAsset");
+          const borrowSelect = document.getElementById("borrowAsset");
+          const collateralSelect = document.getElementById("collateralAsset");
+          supplySelect.innerHTML = "";
+          borrowSelect.innerHTML = "";
+          collateralSelect.innerHTML = "";
+          assets.forEach(a => {
+            const opt1 = document.createElement("option");
+            opt1.value = a;
+            opt1.textContent = fmtShort(a);
+            supplySelect.appendChild(opt1);
+            const opt2 = document.createElement("option");
+            opt2.value = a;
+            opt2.textContent = fmtShort(a);
+            borrowSelect.appendChild(opt2);
+            const opt3 = document.createElement("option");
+            opt3.value = a;
+            opt3.textContent = fmtShort(a);
+            collateralSelect.appendChild(opt3);
+          });
