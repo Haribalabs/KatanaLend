@@ -423,3 +423,88 @@
         <div id="panelOverview" class="panel-section">
           <div id="positionList"></div>
           <div class="card" style="margin-top: 1rem;">
+            <h2>Collateral toggle</h2>
+            <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 0.75rem;">Enable or disable an asset as collateral (affects borrow capacity and liquidation).</p>
+            <div class="form-group">
+              <label>Asset</label>
+              <select id="collateralAsset"></select>
+            </div>
+            <button class="btn" id="collateralOnBtn">Use as collateral</button>
+            <button class="btn" id="collateralOffBtn" style="margin-left: 0.5rem;">Disable collateral</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="txStatus" class="tx-status"></div>
+    </div>
+  </div>
+
+  <footer>KatanaLend — BladeForge Vault. Connect at your own risk. Verify contract on-chain.</footer>
+
+  <script>
+    (function() {
+      const VAULT_ABI = [
+        "function getAssetList() view returns (address[])",
+        "function getDashboardAssets() view returns (tuple(address asset, uint256 totalSupply, uint256 totalBorrows, uint256 utilizationWad, uint256 ratePerBlock, uint256 apyBpsEst, uint256 priceWad, bool borrowEnabled, bool depositsFrozen, uint256 collateralFactorBps, uint256 liquidationThresholdBps)[])",
+        "function getDashboardUser(address) view returns (uint256 totalCollateralWad, uint256 totalDebtWad, uint256 healthWad, bool liquidatable)",
+        "function getMarketStats() view returns (uint256 totalAssets, uint256 totalTvlWad, uint256 totalFeesAccrued, uint256 totalLiquidationsWei, uint256 deployTs, bool paused)",
+        "function getPositionSummary(address) view returns (tuple(address asset, uint256 supplied, uint256 borrowed, uint256 borrowBalanceCurrent, bool collateralEnabled, uint256 priceWad)[])",
+        "function getUserOverview(address) view returns (tuple(uint256 totalCollateralValueWad, uint256 totalDebtValueWad, uint256 healthFactorWad, uint256 maxBorrowValueWad, bool liquidatable, uint256 assetCountWithPosition))",
+        "function supply(address asset, uint256 amount)",
+        "function withdraw(address asset, uint256 amount)",
+        "function borrow(address asset, uint256 amount)",
+        "function repay(address asset, uint256 amount)",
+        "function setCollateralEnabled(address asset, bool enabled)",
+        "function getSupplyBalance(address user, address asset) view returns (uint256)",
+        "function getBorrowBalance(address user, address asset) view returns (uint256)",
+        "function getMaxBorrowCapacityWad(address user, address borrowAsset) view returns (uint256)",
+        "function oraclePriceWad(address) view returns (uint256)",
+        "function assetConfigs(address) view returns (bool allowed, bool borrowEnabled, bool depositsFrozen, uint256 collateralFactorBps, uint256 liquidationThresholdBps, uint256 liquidationBonusBps, uint256 reserveFactorBps, uint256 baseRatePerBlock, uint256 slope1PerBlock, uint256 slope2PerBlock, uint256 optimalUtilizationBps)"
+      ];
+
+      let provider, signer, vault, vaultAddress, userAddress;
+      const SCALE = 1e18;
+
+      const connectBtn = document.getElementById("connectBtn");
+      const connectBtnMain = document.getElementById("connectBtnMain");
+      const connectPrompt = document.getElementById("connectPrompt");
+      const appContent = document.getElementById("appContent");
+      const userAddr = document.getElementById("userAddr");
+      const vaultAddressInput = document.getElementById("vaultAddress");
+      const txStatus = document.getElementById("txStatus");
+
+      function showTx(msg, type) {
+        txStatus.textContent = msg;
+        txStatus.className = "tx-status show " + (type || "pending");
+      }
+
+      function hideTx() {
+        txStatus.className = "tx-status";
+        txStatus.textContent = "";
+      }
+
+      async function connect() {
+        if (typeof window.ethereum === "undefined") {
+          showTx("No Ethereum wallet found. Install MetaMask or similar.", "error");
+          return;
+        }
+        try {
+          provider = new ethers.BrowserProvider(window.ethereum);
+          const accounts = await provider.send("eth_requestAccounts", []);
+          if (!accounts.length) return;
+          signer = await provider.getSigner();
+          userAddress = await signer.getAddress();
+          userAddr.textContent = userAddress.slice(0, 6) + "…" + userAddress.slice(-4);
+          connectBtn.textContent = "Disconnect";
+          connectPrompt.style.display = "none";
+          appContent.style.display = "block";
+          const addr = vaultAddressInput.value.trim();
+          if (addr && ethers.isAddress(addr)) {
+            vaultAddress = addr;
+            vault = new ethers.Contract(vaultAddress, VAULT_ABI, signer);
+          } else {
+            vault = null;
+            vaultAddress = null;
+          }
+          await refresh();
+        } catch (e) {
