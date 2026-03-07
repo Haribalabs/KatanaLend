@@ -678,3 +678,84 @@
           showTx("Enter a valid amount.", "error");
           return;
         }
+        const amountWei = ethers.parseUnits(amount, 18);
+        showTx("Confirm withdraw in your wallet…", "pending");
+        try {
+          const tx = await vault.withdraw(asset, amountWei);
+          await tx.wait();
+          showTx("Withdraw successful.", "success");
+          document.getElementById("withdrawAmount").value = "";
+          refresh();
+        } catch (e) {
+          showTx(e.message || "Withdraw failed", "error");
+        }
+      }
+
+      async function doBorrow() {
+        if (!vault || !userAddress) return;
+        const asset = document.getElementById("borrowAsset").value;
+        const amount = document.getElementById("borrowAmount").value;
+        if (!amount || Number(amount) <= 0) {
+          showTx("Enter a valid amount.", "error");
+          return;
+        }
+        const amountWei = ethers.parseUnits(amount, 18);
+        showTx("Confirm borrow in your wallet…", "pending");
+        try {
+          const tx = await vault.borrow(asset, amountWei);
+          await tx.wait();
+          showTx("Borrow successful.", "success");
+          document.getElementById("borrowAmount").value = "";
+          refresh();
+        } catch (e) {
+          showTx(e.message || "Borrow failed", "error");
+        }
+      }
+
+      async function doRepay() {
+        if (!vault || !userAddress) return;
+        const asset = document.getElementById("borrowAsset").value;
+        const amount = document.getElementById("repayAmount").value;
+        if (!amount || Number(amount) <= 0) {
+          showTx("Enter a valid amount.", "error");
+          return;
+        }
+        const amountWei = ethers.parseUnits(amount, 18);
+        showTx("Confirm repay in your wallet…", "pending");
+        try {
+          const tx = await vault.repay(asset, amountWei);
+          await tx.wait();
+          showTx("Repay successful.", "success");
+          document.getElementById("repayAmount").value = "";
+          refresh();
+        } catch (e) {
+          showTx(e.message || "Repay failed", "error");
+        }
+      }
+
+      document.getElementById("supplyBtn").onclick = doSupply;
+      document.getElementById("withdrawBtn").onclick = doWithdraw;
+      document.getElementById("borrowBtn").onclick = doBorrow;
+      document.getElementById("repayBtn").onclick = doRepay;
+
+      async function setCollateral(on) {
+        if (!vault || !userAddress) return;
+        const asset = document.getElementById("collateralAsset").value;
+        showTx("Confirm in wallet…", "pending");
+        try {
+          const tx = await vault.setCollateralEnabled(asset, on);
+          await tx.wait();
+          showTx(on ? "Collateral enabled." : "Collateral disabled.", "success");
+          refresh();
+        } catch (e) {
+          showTx(e.message || "Failed", "error");
+        }
+      }
+      document.getElementById("collateralOnBtn").onclick = () => setCollateral(true);
+      document.getElementById("collateralOffBtn").onclick = () => setCollateral(false);
+
+      setInterval(refresh, 20000);
+    })();
+  </script>
+</body>
+</html>
